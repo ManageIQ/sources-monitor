@@ -1,6 +1,6 @@
 # Sources::Monitor
 
-[![Build Status](https://api.travis-ci.org/RedHatInsights/sources-monitor.svg)](https://travis-ci.org/RedHatInsights/sources-monitor)
+[![Build Status](https://api.travis-ci.com/RedHatInsights/sources-monitor.svg)](https://travis-ci.com/RedHatInsights/sources-monitor)
 [![Maintainability](https://api.codeclimate.com/v1/badges/f9bf0e45949cd681cee1/maintainability)](https://codeclimate.com/github/RedHatInsights/sources-monitor/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/f9bf0e45949cd681cee1/test_coverage)](https://codeclimate.com/github/RedHatInsights/sources-monitor/test_coverage)
 [![security](https://hakiri.io/github/RedHatInsights/sources-monitor/master.svg)](https://hakiri.io/github/RedHatInsights/sources-monitor/master)
