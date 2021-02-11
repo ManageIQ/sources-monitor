@@ -12,10 +12,6 @@ RSpec.describe(Sources::Monitor::AvailabilityChecker) do
     end
     let(:headers) { {"Content-Type" => "application/json"}.merge(identity) }
 
-    let(:messaging_client)  { double("ManageIQ::Messaging::Client") }
-    let(:openshift_topic)   { "platform.topological-inventory.operations-openshift" }
-    let(:amazon_topic)      { "platform.topological-inventory.operations-amazon" }
-
     let(:tenants_response) do
       [{"external_tenant" => orchestrator_tenant}].to_json
     end
@@ -82,11 +78,6 @@ RSpec.describe(Sources::Monitor::AvailabilityChecker) do
           :external_tenant => "10002"
         )
       }
-    end
-
-    before do
-      allow(ManageIQ::Messaging::Client).to receive(:open).and_return(messaging_client)
-      allow(messaging_client).to receive(:close)
     end
 
     it "fails with missing source state" do
