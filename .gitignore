@@ -15,3 +15,6 @@ bundler.d/*
 
 # rspec failure tracking
 .rspec_status
+
+# Local Bonfire (Clowder deploy) settings
+/config.yaml
