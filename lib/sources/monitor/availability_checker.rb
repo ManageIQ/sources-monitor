@@ -1,13 +1,11 @@
 require "sources/monitor/core/api_client"
 require "sources/monitor/core/logging"
-require "sources/monitor/core/messaging"
 
 module Sources
   module Monitor
     class AvailabilityChecker
       include Logging
       include Core::ApiClient
-      include Core::Messaging
 
       SUPPORTED_STATES = %w[available unavailable].freeze
 
