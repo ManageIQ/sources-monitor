@@ -1,24 +1,24 @@
-require 'app-common-ruby'
+require 'clowder-common-ruby'
 require 'singleton'
+
 module Sources
   module Monitor
-
     class ClowderConfig
       include Singleton
 
       def self.instance
         @instance ||= {}.tap do |options|
-          if ENV["CLOWDER_ENABLED"].present?
-            config                        = LoadedConfig # TODO not an ideal name
-            options["logGroup"]           = config.logging.cloudwatch.logGroup
-            options["awsRegion"]          = config.logging.cloudwatch.region
+          if ::ClowderCommonRuby::Config.clowder_enabled?
+            config                        = ::ClowderCommonRuby::Config.load
             options["awsAccessKeyId"]     = config.logging.cloudwatch.accessKeyId
+            options["awsRegion"]          = config.logging.cloudwatch.region
             options["awsSecretAccessKey"] = config.logging.cloudwatch.secretAccessKey
+            options["logGroup"]           = config.logging.cloudwatch.logGroup
           else
-            options["logGroup"]           = "platform-dev"
-            options["awsRegion"]          = "us-east-1"
             options["awsAccessKeyId"]     = ENV['CW_AWS_ACCESS_KEY_ID']
+            options["awsRegion"]          = "us-east-1"
             options["awsSecretAccessKey"] = ENV['CW_AWS_SECRET_ACCESS_KEY']
+            options["logGroup"]           = "platform-dev"
           end
         end
       end

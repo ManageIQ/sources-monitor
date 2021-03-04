@@ -21,8 +21,6 @@ objects:
         - /opt/sources-monitor/bin/availability_checker
         - available
         env:
-        - name: CLOWDER_ENABLED
-          value: ${CLOWDER_ENABLED}
         - name: LOG_LEVEL
           value: ${LOG_LEVEL}
         - name: SOURCES_SCHEME
@@ -49,8 +47,6 @@ objects:
         - /opt/sources-monitor/bin/availability_checker
         - unavailable
         env:
-        - name: CLOWDER_ENABLED
-          value: ${CLOWDER_ENABLED}
         - name: LOG_LEVEL
           value: ${LOG_LEVEL}
         - name: SOURCES_SCHEME
@@ -67,14 +63,13 @@ objects:
             cpu: ${CPU_REQUEST}
             memory: ${MEMORY_REQUEST}
 parameters:
-- description: Clowder enabled flag
-  displayName: Clowder enabled
-  name: CLOWDER_ENABLED
-  value: ''
 - name: CPU_LIMIT
   value: 250m
 - name: CPU_REQUEST
   value: 75m
+- description: Clowder ENV
+  name: ENV_NAME
+  required: true
 - description: Image
   name: IMAGE
   value: quay.io/cloudservices/sources-monitor
