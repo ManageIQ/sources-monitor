@@ -5,7 +5,7 @@ require File.join(Bundler::Plugin.index.load_paths("bundler-inject")[0], "bundle
 $LOAD_PATH.push(File.expand_path("lib", __dir__))
 
 # Parser for Clowder config in ENV['ACG_CONFIG'] path
-gem 'clowder-common-ruby', :git => 'https://github.com/RedHatInsights/clowder-common-ruby', :branch => 'master', :require => false
+gem 'clowder-common-ruby', "~> 0.2.1"
 
 gem "cloudwatchlogger",   "~> 0.2.1"
 gem "manageiq-loggers",   "~> 0.4.2"
