@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: Template
 metadata:
-  name: sources
+  name: sources-monitor
 objects:
 - apiVersion: cloud.redhat.com/v1alpha1
   kind: ClowdApp
   metadata:
-    name: sources
+    name: sources-monitor
   spec:
     envName: ${ENV_NAME}
     jobs:
-    - name: available-source-checker
+    - name: available-sources
       schedule: ${SCHEDULE_AVAILABLE}
       concurrencyPolicy: Forbid
       restartPolicy: Never
@@ -36,7 +36,7 @@ objects:
           requests:
             cpu: ${CPU_REQUEST}
             memory: ${MEMORY_REQUEST}
-    - name: unavailable-source-checker
+    - name: unavailable-sources
       schedule: ${SCHEDULE_UNAVAILABLE}
       concurrencyPolicy: Forbid
       restartPolicy: Never
@@ -98,7 +98,7 @@ parameters:
   displayName: Sources Service Host
   name: SOURCES_HOST
   required: true
-  value: sources-api
+  value: sources-api-svc
 - description: Port to use for the Sources service URL.
   displayName: Sources Service Port
   name: SOURCES_PORT
