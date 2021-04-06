@@ -7,6 +7,9 @@ objects:
   kind: ClowdApp
   metadata:
     name: sources-monitor
+    labels:
+      app: sources
+      clowdapp: sources-monitor
   spec:
     envName: ${ENV_NAME}
     jobs:
