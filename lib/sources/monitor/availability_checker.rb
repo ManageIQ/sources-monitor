@@ -1,5 +1,8 @@
 require "sources/monitor/core/api_client"
 require "sources/monitor/core/logging"
+require "active_support/core_ext/object/try"
+require "active_support/core_ext/numeric/bytes"
+require "active_support/core_ext/string"
 
 module Sources
   module Monitor
