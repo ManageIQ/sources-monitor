@@ -12,7 +12,7 @@ gem "manageiq-messaging",    "~> 1.0.0"
 gem "optimist"
 gem "rake",                  "~> 13.0.0"
 gem "rest-client",           "~>2.0"
-gem "sources-api-client",    "~> 1.0"
+gem "sources-api-client",    "~> 3.0"
 
 group :test, :development do
   gem "rspec"

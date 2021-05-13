@@ -23,7 +23,7 @@ module Sources
 
       def check_sources
         logger.info("AvailabilityChecker started for #{source_state} Sources")
-        fetch_sources.each do |source|
+        fetch_sources do |source|
           request_availability_check(source)
         end
       end
@@ -33,26 +33,26 @@ module Sources
       def fetch_sources
         source_type_name = Hash[api_client.list_source_types.data.collect { |st| [st.id, st.name] }]
 
-        sources = []
-        internal_api_get(:tenants).each do |tenant|
-          paged_query(api_client(tenant["external_tenant"]), :list_sources).each do |source|
+        paged_sources_get do |sources|
+          sources.each do |source|
             next unless availability_status_matches(source, source_state)
 
-            sources << {
-              :id     => source.id.to_s,
-              :tenant => source.tenant,
-              :type   => source_type_name[source.source_type_id]
+            attrs = {
+              :id     => source['id'].to_s,
+              :tenant => source['tenant'],
+              :type   => source_type_name[source['source_type_id']]
             }
+
+            yield attrs
           end
         end
-        sources.uniq
       rescue => e
         logger.error("Source#availability_check - Failed to query #{source_state} Sources - #{e.message}")
         []
       end
 
       def availability_status_matches(source, source_state)
-        sas = source.availability_status
+        sas = source['availability_status']
         source_state == "available" ? sas == "available" : sas != "available"
       end
 
