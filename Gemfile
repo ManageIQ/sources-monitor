@@ -5,7 +5,7 @@ require File.join(Bundler::Plugin.index.load_paths("bundler-inject")[0], "bundle
 $LOAD_PATH.push(File.expand_path("lib", __dir__))
 
 # Parser for Clowder config in ENV['ACG_CONFIG'] path
-gem "activesupport",         "~> 5.2", ">= 5.2.4.3"
+gem "activesupport",         "~> 5.2.4", ">= 5.2.4.3"
 gem 'clowder-common-ruby',   "~> 0.2.1"
 gem "insights-loggers-ruby", "~> 0.1.9"
 gem "manageiq-messaging",    "~> 1.0.0"
