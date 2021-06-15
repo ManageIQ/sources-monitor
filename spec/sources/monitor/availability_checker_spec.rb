@@ -68,83 +68,173 @@ RSpec.describe(Sources::Monitor::AvailabilityChecker) do
       expect { described_class.new("bogus_state").to raise_error("Invalid Source state bogus_state specified") }
     end
 
-    [1, 3, 1000].each do |page_size|
-      context "with page size: #{page_size}" do
-        around do |example|
-          ENV['PAGE_SIZE'] = page_size.to_s
-          example.run
-          ENV['PAGE_SIZE'] = nil
-        end
-
-        before do
-          stub_request(:get, "https://cloud.redhat.com/api/sources/v3.0/source_types")
-            .with(:headers => headers)
-            .to_return(:status => 200, :body => source_types_response, :headers => {})
-
-          data = []
-          if page_size == 1
-            sources.size.times { |offset| data << {:data => [sources[offset]], :offset => offset } }
-            data << {:data => [], :offset => 4}
-          elsif page_size == 3
-            data << {:data => sources[0..2], :offset => 0}
-            data << {:data => [sources[3]], :offset => 3}
-          else
-            data << {:data => sources, :offset => 0}
+    context "when PSK is not present" do
+      [1, 3, 1000].each do |page_size|
+        context "with page size: #{page_size}" do
+          around do |example|
+            ENV['PAGE_SIZE'] = page_size.to_s
+            example.run
+            ENV['PAGE_SIZE'] = nil
           end
 
-          data.each do |hash|
-            stub_request(:get, "https://cloud.redhat.com/internal/v2.0/sources?limit=#{page_size}&offset=#{hash[:offset]}")
+          before do
+            stub_request(:get, "https://cloud.redhat.com/api/sources/v3.0/source_types")
               .with(:headers => headers)
-              .to_return(:status => 200, :body => {"data" => hash[:data]}.to_json, :headers => {})
+              .to_return(:status => 200, :body => source_types_response, :headers => {})
+
+            data = []
+            if page_size == 1
+              sources.size.times { |offset| data << {:data => [sources[offset]], :offset => offset } }
+              data << {:data => [], :offset => 4}
+            elsif page_size == 3
+              data << {:data => sources[0..2], :offset => 0}
+              data << {:data => [sources[3]], :offset => 3}
+            else
+              data << {:data => sources, :offset => 0}
+            end
+
+            data.each do |hash|
+              stub_request(:get, "https://cloud.redhat.com/internal/v2.0/sources?limit=#{page_size}&offset=#{hash[:offset]}")
+                .with(:headers => headers)
+                .to_return(:status => 200, :body => {"data" => hash[:data]}.to_json, :headers => {})
+            end
+
           end
 
-        end
+          it "sends a request for an available source to the sources api" do
+            instance = described_class.new("available")
 
-        it "sends a request for an available source to the sources api" do
-          instance = described_class.new("available")
+            sources.each do |source|
+              next if source['availability_status'] == 'unavailable'
 
-          sources.each do |source|
-            next if source['availability_status'] == 'unavailable'
+              stub_request(:post, "https://cloud.redhat.com/api/sources/v3.0/sources/#{source["id"]}/check_availability")
+                .with(:headers => headers.merge(instance.identity(source["tenant"])))
+                .to_return(:status => 202, :body => "", :headers => {})
+            end
 
-            stub_request(:post, "https://cloud.redhat.com/api/sources/v3.0/sources/#{source["id"]}/check_availability")
-              .with(:headers => headers.merge(instance.identity(source["tenant"])))
-              .to_return(:status => 202, :body => "", :headers => {})
-          end
+            instance.check_sources
 
-          instance.check_sources
+            sources.each do |source|
+              next if source['availability_status'] == 'unavailable'
 
-          sources.each do |source|
-            next if source['availability_status'] == 'unavailable'
-
-            assert_requested(:post,
-                           "https://cloud.redhat.com/api/sources/v3.0/sources/#{source["id"]}/check_availability",
-                           :headers => headers.merge(instance.identity(source["tenant"])),
-                           :body    => "",
-                           :times   => 1)
-          end
-        end
-
-        it "sends a request for an unavailable source to the sources api" do
-          instance = described_class.new("unavailable")
-
-          sources.each do |source|
-            next if source['availability_status'] == 'available'
-
-            stub_request(:post, "https://cloud.redhat.com/api/sources/v3.0/sources/#{source["id"]}/check_availability")
-              .with(:headers => headers.merge(instance.identity(source["tenant"])))
-              .to_return(:status => 202, :body => "", :headers => {})
-          end
-
-          instance.check_sources
-
-          sources.each do |source|
-            next if source['availability_status'] == 'available'
-
-            assert_requested(:post,
+              assert_requested(:post,
                              "https://cloud.redhat.com/api/sources/v3.0/sources/#{source["id"]}/check_availability",
                              :headers => headers.merge(instance.identity(source["tenant"])),
                              :body    => "",
                              :times   => 1)
+            end
+          end
+
+          it "sends a request for an unavailable source to the sources api" do
+            instance = described_class.new("unavailable")
+
+            sources.each do |source|
+              next if source['availability_status'] == 'available'
+
+              stub_request(:post, "https://cloud.redhat.com/api/sources/v3.0/sources/#{source["id"]}/check_availability")
+                .with(:headers => headers.merge(instance.identity(source["tenant"])))
+                .to_return(:status => 202, :body => "", :headers => {})
+            end
+
+            instance.check_sources
+
+            sources.each do |source|
+              next if source['availability_status'] == 'available'
+
+              assert_requested(:post,
+                               "https://cloud.redhat.com/api/sources/v3.0/sources/#{source["id"]}/check_availability",
+                               :headers => headers.merge(instance.identity(source["tenant"])),
+                               :body    => "",
+                               :times   => 1)
+            end
+          end
+        end
+      end
+    end
+
+    context "when there is a PSK present" do
+      [1, 3, 1000].each do |page_size|
+        let(:headers) { {"Content-Type" => "application/json", "x-rh-sources-psk" => "1234"} }
+
+        context "PSK with page size: #{page_size}" do
+          around do |example|
+            ENV['PAGE_SIZE'] = page_size.to_s
+            ENV['SOURCES_PSK'] = "1234"
+            example.run
+            ENV['PAGE_SIZE'] = nil
+            ENV['SOURCES_PSK'] = nil
+          end
+
+          before do
+            stub_request(:get, "https://cloud.redhat.com/api/sources/v3.0/source_types")
+              .with(:headers => headers.merge!("x-rh-sources-account-number" => "system_orchestrator"))
+              .to_return(:status => 200, :body => source_types_response, :headers => {})
+
+            data = []
+            if page_size == 1
+              sources.size.times { |offset| data << {:data => [sources[offset]], :offset => offset } }
+              data << {:data => [], :offset => 4}
+            elsif page_size == 3
+              data << {:data => sources[0..2], :offset => 0}
+              data << {:data => [sources[3]], :offset => 3}
+            else
+              data << {:data => sources, :offset => 0}
+            end
+
+            data.each do |hash|
+              stub_request(:get, "https://cloud.redhat.com/internal/v2.0/sources?limit=#{page_size}&offset=#{hash[:offset]}")
+                .with(:headers => headers.merge!("x-rh-sources-account-number" => "system_orchestrator"))
+                .to_return(:status => 200, :body => {"data" => hash[:data]}.to_json, :headers => {})
+            end
+
+          end
+
+          it "sends a request for an available source to the sources api" do
+            instance = described_class.new("available")
+
+            sources.each do |source|
+              next if source['availability_status'] == 'unavailable'
+
+              stub_request(:post, "https://cloud.redhat.com/api/sources/v3.0/sources/#{source["id"]}/check_availability")
+                .with(:headers => headers.merge!("x-rh-sources-account-number" => source["tenant"]))
+                .to_return(:status => 202, :body => "", :headers => {})
+            end
+
+            instance.check_sources
+
+            sources.each do |source|
+              next if source['availability_status'] == 'unavailable'
+
+              assert_requested(:post,
+                             "https://cloud.redhat.com/api/sources/v3.0/sources/#{source["id"]}/check_availability",
+                             :headers => headers.merge!("x-rh-sources-account-number" => source["tenant"]),
+                             :body    => "",
+                             :times   => 1)
+            end
+          end
+
+          it "sends a request for an unavailable source to the sources api" do
+            instance = described_class.new("unavailable")
+
+            sources.each do |source|
+              next if source['availability_status'] == 'available'
+
+              stub_request(:post, "https://cloud.redhat.com/api/sources/v3.0/sources/#{source["id"]}/check_availability")
+                .with(:headers => headers.merge!("x-rh-sources-account-number" => source["tenant"]))
+                .to_return(:status => 202, :body => "", :headers => {})
+            end
+
+            instance.check_sources
+
+            sources.each do |source|
+              next if source['availability_status'] == 'available'
+
+              assert_requested(:post,
+                               "https://cloud.redhat.com/api/sources/v3.0/sources/#{source["id"]}/check_availability",
+                               :headers => headers.merge!("x-rh-sources-account-number" => source["tenant"]),
+                               :body    => "",
+                               :times   => 1)
+            end
           end
         end
       end
