@@ -23,6 +23,9 @@ module Sources
 
       def check_sources
         logger.info("AvailabilityChecker started for #{source_state} Sources")
+        logger.warn("AvailabilityChecker started for #{source_state} Sources")
+        logger.error("AvailabilityChecker started for #{source_state} Sources")
+
         fetch_sources do |source|
           request_availability_check(source)
         end
