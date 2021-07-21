@@ -12,7 +12,7 @@ module Sources
       if ENV['LOG_HANDLER'] == "haberdasher"
         "Insights::Loggers::StdErrLogger"
       else
-        "ManageIQ::Loggers::CloudWatch"
+        "Insights::Loggers::CloudWatch"
       end
     end
 
