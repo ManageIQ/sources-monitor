@@ -6,7 +6,7 @@ $LOAD_PATH.push(File.expand_path("lib", __dir__))
 
 # Parser for Clowder config in ENV['ACG_CONFIG'] path
 gem "activesupport",         "~> 5.2", ">= 5.2.4.3"
-gem 'clowder-common-ruby',   "~> 0.2.1"
+gem 'clowder-common-ruby',   "~> 0.2.3"
 gem "insights-loggers-ruby", "~> 0.1.10"
 gem "manageiq-messaging",    "~> 1.0.0"
 gem "optimist"
