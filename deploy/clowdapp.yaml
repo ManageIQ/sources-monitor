@@ -31,6 +31,12 @@ objects:
           value: ${SOURCES_HOST}
         - name: SOURCES_PORT
           value: ${SOURCES_PORT}
+        - name: SOURCES_PSK
+          valueFrom:
+            secretKeyRef:
+              name: internal-psk
+              key: psk
+              optional: true
         resources:
           limits:
             cpu: ${CPU_LIMIT}
@@ -59,6 +65,12 @@ objects:
           value: ${SOURCES_HOST}
         - name: SOURCES_PORT
           value: ${SOURCES_PORT}
+        - name: SOURCES_PSK
+          valueFrom:
+            secretKeyRef:
+              name: internal-psk
+              key: psk
+              optional: true
         resources:
           limits:
             cpu: ${CPU_LIMIT}
